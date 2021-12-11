@@ -1,6 +1,7 @@
 name: Fandom Dev Wiki Updater
 
 on:
+  workflow_dispatch:
   push:
     tags: ['*']
 

@@ -18,7 +18,7 @@ const gitLog = execSync('git log -n 1')
   .pop()
   .trim()
 
-bot.login().then(() => {
+bot.login().then(async () => {
   const res = await bot.edit({
     title: 'MediaWiki:UserFunctions.js',
     content: readFileSync(path.resolve(__dirname, '../lib/index.js')).toString(
