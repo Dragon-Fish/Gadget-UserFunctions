@@ -1,19 +1,11 @@
 /**
  * @name UserFunctions.js
- * @description Provides functions similar to [[mw:Extension:UserFunctions]]
+ * @description Provides functions similar to Extension:UserFunctions
+ *              based on JavaScript.
  * @author 机智的小鱼君 <dragon-fish@qq.com>
  *
  * @url https://github.com/Fandom-zh/Gadget-UserFunctions
  * @license MIT
- */
-
-/**
- * @example ```xml
- * <span class="user-functions" data-username></span>
- * <span class="user-functions" data-if-logged-in="{true | false}"></span>
- * <span class="user-functions" data-if-username="{string | string[]}"></span>
- * <span class="user-functions" data-if-usergroup="{string | string[]}"></span>
- * ```
  */
 
 class UserFunctions {
