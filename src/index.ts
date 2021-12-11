@@ -73,12 +73,13 @@ class UserFunctions {
   }
 
   handleUserName($el: JQuery<HTMLElement>) {
+    const text = $el.text()
     $el.html('')
     if ($el.data('with-link') !== undefined) {
       $el.append(
         $('<a>', {
           href: mw.util.getUrl(`User:${this.userName}`),
-          text: this.userName,
+          text: text || this.userName,
         })
       )
     } else {
@@ -144,5 +145,14 @@ class UserFunctions {
   }
 }
 
+// Define global variable
+interface Window {
+  dev: {
+    UserFunctions: typeof UserFunctions
+  }
+}
+window.dev = { ...window.dev, UserFunctions }
+
+// Run
 const app = new UserFunctions()
 app.init()

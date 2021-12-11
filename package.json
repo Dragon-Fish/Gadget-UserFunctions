@@ -1,7 +1,6 @@
 {
   "name": "mediawiki-userfunctions",
   "version": "2.0.0-rc.0",
-  "private": true,
   "description": "Provides functions similar to [Extension:UserFunctions](https://www.mediawiki.org/wiki/Extension:UserFunctions) based on JavaScript.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
