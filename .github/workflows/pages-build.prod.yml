@@ -1,0 +1,46 @@
+name: Build Production
+
+on:
+  push:
+    branches: ['master']
+    tags: ['*']
+    paths:
+      - '.github/workflows/**'
+      - 'src/**'
+      - 'docs/**'
+
+jobs:
+  build:
+    # 使用最新版ubantu虚拟机运行
+    runs-on: ubuntu-latest
+
+    steps:
+      # from: https://github.com/actions/checkout
+      - name: 本工作流
+        uses: actions/checkout@master
+
+      # 安装最新版 Node.js
+      # from: https://github.com/actions/setup-node
+      - name: 安装 Node.js
+        uses: actions/setup-node@master
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+
+      - name: 安装 pnpm
+        run: |
+          npm i -g pnpm
+          pnpm -v
+      - name: 安装项目依赖
+        run: |
+          pnpm i
+      - name: 构建项目
+        run: |
+          pnpm build
+          cp lib/* docs/
+      - name: 部署到 GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: dist
+          publish_dir: ./docs
