@@ -1,0 +1,7 @@
+.github
+.vscode
+.eslintrc.yml
+dist
+tsconfig.json
+package.json
+lib

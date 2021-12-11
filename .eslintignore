@@ -1,0 +1,4 @@
+*.dev.*
+dist
+*.d.ts
+lib
