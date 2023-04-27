@@ -38,4 +38,4 @@ jobs:
           MW_USERNAME: ${{ secrets.MW_USERNAME_SARA_LINDERY }}
           MW_PASSWORD: ${{ secrets.MW_PASSWORD_SARA_LINDERY }}
         run: |
-          node script/fandom-updater.js
+          pnpm publish:fandom
