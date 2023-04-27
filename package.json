@@ -19,7 +19,6 @@
   "author": "Dragon-Fish <dragon-fish@qq.com>",
   "license": "MIT",
   "devDependencies": {
-    "@lavgup/mediawiki.js": "^1.2.2",
     "@types/jquery": "^3.5.16",
     "@types/node": "^18.16.1",
     "@typescript-eslint/eslint-plugin": "^5.59.1",

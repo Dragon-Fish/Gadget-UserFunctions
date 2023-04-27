@@ -9,26 +9,24 @@
  */
 
 class UserFunctions {
-  private _el: JQuery<HTMLElement>
-  userName: string
-  userGroups: string[]
-  isLoggedIn: boolean
+  private _elements: JQuery<HTMLElement>
+  readonly userName = mw.config.get('wgUserName')
+  readonly userGroups = mw.config.get('wgUserGroups')
+  readonly isLoggedIn = !mw.user.isAnon()
 
-  constructor(
-    selector: string | JQuery<HTMLElement> = '.user-functions, .UserFunctions'
-  ) {
-    this._el = $(selector as string)
-    this.userName = mw.config.get('wgUserName')
-    this.userGroups = mw.config.get('wgUserGroups')
-    this.isLoggedIn = this.userName !== null
+  constructor(selector: string | JQuery<HTMLElement>) {
+    this._elements = $(selector as string)
   }
 
-  set $elements(selector: string | JQuery<HTMLElement>) {
-    this._el = $(selector as string)
+  get elements() {
+    return this._elements
+  }
+  set elements(selector: string | JQuery<HTMLElement>) {
+    this._elements = $(selector as string)
   }
 
   init() {
-    this._el.each((index, element) => {
+    this._elements.each((_, element) => {
       const $el = $(element)
       const username = $el.data('username') !== undefined
       const ifLoggedIn = $el.data('if-logged-in') !== undefined
@@ -49,29 +47,6 @@ class UserFunctions {
     })
   }
 
-  /**
-   * Get standard compare boolean map
-   * @example toBoolMap('foo|!bar') === { foo: true, bar: false }
-   */
-  toBoolMap(data: string) {
-    const arr = data.split('|')
-    const map: Record<string, boolean> = {}
-    arr.forEach((item) => {
-      const key = item.trim().replace(/^!/, '')
-      map[key] = !item.startsWith('!')
-    })
-    return map
-  }
-
-  /**
-   * Data is means yes or no
-   * - `false`, `no`, `n`, `0` → `false`
-   * - others → `true`
-   */
-  toBoolean(data: any) {
-    return ![false, 'false', 'no', 'n', 0, '0'].includes(data)
-  }
-
   handleUserName($el: JQuery<HTMLElement>) {
     const text = $el.text()
     $el.html('')
@@ -85,39 +60,42 @@ class UserFunctions {
     } else {
       $el.text(this.userName)
     }
-    $el.attr('userfunctions-hit', 'true')
+    $el.attr('data-user-fn-hit', 'true')
     return $el
   }
 
   handleIfLoggedIn($el: JQuery<HTMLElement>) {
-    const yes = this.toBoolean($el.data('if-logged-in'))
+    const yes = UserFunctions.parseBool($el.data('if-logged-in'))
     const show = (yes && this.isLoggedIn) || (!yes && !this.isLoggedIn)
-    $el.toggle(show).attr('data-userfunctions-hit', '' + show)
+    $el.toggle(show).attr('data-user-fn-hit', '' + show)
     return $el
   }
 
   handleIfUserName($el: JQuery<HTMLElement>) {
-    const users = this.toBoolMap($el.data('if-username'))
-    const show = !!users[this.userName]
-    $el.toggle(show).attr('data-userfunctions-hit', '' + show)
+    const users = {
+      ['' + this.userName]: false,
+      ...UserFunctions.parseBoolMap($el.data('if-username')),
+    }
+    const show = !!users['' + this.userName]
+    $el.toggle(show).attr('data-user-fn-hit', '' + show)
     return $el
   }
 
   handleIfUserGroup($el: JQuery<HTMLElement>) {
-    const map = this.toBoolMap($el.data('if-usergroup'))
+    const groups = UserFunctions.parseBoolMap($el.data('if-usergroup'))
     let show = false
-    for (const group in map) {
-      const yes = map[group]
+    Object.keys(groups).forEach((key) => {
+      const yes = groups[key]
       if (
-        (yes && this.userGroups.includes(group)) ||
-        (!yes && !this.userGroups.includes(group))
+        (yes && this.userGroups.includes(key)) ||
+        (!yes && !this.userGroups.includes(key))
       ) {
         show = true
       } else {
         show = false
       }
-    }
-    $el.toggle(show).attr('data-userfunctions-hit', '' + show)
+    })
+    $el.toggle(show).attr('data-user-fn-hit', '' + show)
     return $el
   }
 
@@ -140,8 +118,31 @@ class UserFunctions {
           ']'
         )
       )
-      .attr('data-userfunctions-hit', 'true')
-      .attr('data-userfunctions-error', 'true')
+      .attr('data-user-fn-hit', 'true')
+      .attr('data-user-fn-error', 'true')
+  }
+
+  /**
+   * Get standard compare boolean map
+   * @example toBoolMap('foo|!bar') === { foo: true, bar: false }
+   */
+  static parseBoolMap(data: string) {
+    const arr = data.split('|')
+    const map: Record<string, boolean> = {}
+    arr.forEach((item) => {
+      const key = item.trim().replace(/^!/, '')
+      map[key] = !item.startsWith('!')
+    })
+    return map
+  }
+
+  /**
+   * Data is means yes or no
+   * - `false`, `no`, `n`, `0` → `false`
+   * - others → `true`
+   */
+  static parseBool(data: any) {
+    return ![false, 'false', 'no', 'n', 0, '0'].includes(data)
   }
 }
 
@@ -154,5 +155,5 @@ interface Window {
 window.dev = { ...window.dev, UserFunctions }
 
 // Run
-const app = new UserFunctions()
+const app = new UserFunctions('.user-functions, .UserFunctions')
 app.init()
