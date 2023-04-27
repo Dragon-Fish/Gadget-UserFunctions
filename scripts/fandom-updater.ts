@@ -4,19 +4,32 @@ import { resolve } from 'path'
 import { MwApi } from 'wiki-saikou'
 
 const WIKI_ENDPOINT = 'https://dev.fandom.com/api.php'
+const FANDOM_AUTH_ENDPOINT =
+  'https://services.fandom.com/mobile-fandom-app/fandom-auth/login'
 const WIKI_TITLE = 'MediaWiki:UserFunctions.js'
 const FILE_NAME = resolve(__dirname, '../lib/index.js')
 
 ;(async () => {
   const app = new MwApi(WIKI_ENDPOINT)
-  // @FIXME this is not work for Fandom
-  await app
-    .login(process.env.MW_USERNAME as string, process.env.MW_PASSWORD as string)
-    .then((data) => {
-      if (data.status !== 'PASS') {
-        return Promise.reject(data)
-      }
-      console.info(`[Login ${data.status}]`, data)
+
+  // @TODO [Temporary!] Unstable internal API for Fandom authorization.
+  await app.ajax
+    .post(FANDOM_AUTH_ENDPOINT, {
+      username: process.env.MW_USERNAME,
+      password: process.env.MW_PASSWORD,
+    })
+    .then(({ data, headers }) => {
+      app.cookies.access_token = data?.access_token
+      const rawCookies = headers['set-cookie']
+      rawCookies?.forEach((i) => {
+        const [name, ...value] = i.split(';')[0].split('=')
+        app.cookies[name] = value.join('=')
+      })
+      return app.getUserInfo()
+    })
+    .then((userinfo) => {
+      if (!userinfo.id) return Promise.reject('Missing userInfo')
+      console.info('[LOGIN PASS]', `User:${userinfo.name}`)
     })
     .catch((e) => {
       console.error('[Login ERROR]', e)
